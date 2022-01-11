@@ -1,0 +1,63 @@
+---
+- name: Create the gitlab_ci_pipelines_exporter group
+  group:
+    name: "{{ _gitlab_ci_pipelines_exporter_system_group }}"
+    state: present
+    system: true
+  when: _gitlab_ci_pipelines_exporter_system_group != "root"
+
+- name: Create the gitlab_ci_pipelines_exporter user
+  user:
+    name: "{{ _gitlab_ci_pipelines_exporter_system_user }}"
+    groups: "{{ _gitlab_ci_pipelines_exporter_system_group }}"
+    append: true
+    shell: /usr/sbin/nologin
+    system: true
+    create_home: false
+    home: /
+  when: _gitlab_ci_pipelines_exporter_system_user != "root"
+
+- block:
+    - name: Download gitlab-ci-pipelines-exporter binary to local folder
+      become: false
+      get_url:
+        url: "https://github.com/mvisonneau/gitlab-ci-pipelines-exporter/releases/download/v{{ gitlab_ci_pipelines_exporter_version }}/gitlab-ci-pipelines-exporter_v{{ gitlab_ci_pipelines_exporter_version }}_linux_{{ go_arch }}.tar.gz"
+        dest: "/tmp/gitlab-ci-pipelines-exporter_v{{ gitlab_ci_pipelines_exporter_version }}_linux_{{go_arch}}.tar.gz"
+        checksum: "sha512:{{ gitlab_ci_pipelines_exporter_checksum }}"
+      register: _download_binary
+      until: _download_binary is succeeded
+      retries: 5
+      delay: 2
+      delegate_to: localhost
+      check_mode: false
+
+    - name: Unpack gitlab-ci-pipelines-exporter binaries
+      become: false
+      unarchive:
+        src: "/tmp/gitlab-ci-pipelines-exporter_v{{ gitlab_ci_pipelines_exporter_version }}_linux_{{go_arch}}.tar.gz"
+        dest: "/tmp"
+        creates: "/tmp/gitlab-ci-pipelines-exporter_v{{ gitlab_ci_pipelines_exporter_version }}_linux_{{go_arch}}/gitlab-ci-pipelines-exporter"
+        extra_opts: ["--one-top-level=/tmp/gitlab-ci-pipelines-exporter_v{{ gitlab_ci_pipelines_exporter_version }}_linux_{{go_arch}}"]
+      delegate_to: localhost
+      check_mode: false
+
+    - name: Propagate gitlab-ci-pipelines-exporter binaries
+      copy:
+        src: "/tmp/gitlab-ci-pipelines-exporter_v{{ gitlab_ci_pipelines_exporter_version }}_linux_{{go_arch}}/gitlab-ci-pipelines-exporter"
+        dest: "{{ _gitlab_ci_pipelines_exporter_binary_install_dir }}/gitlab-ci-pipelines-exporter"
+        mode: 0755
+        owner: root
+        group: root
+      notify: restart gitlab-ci-pipelines-exporter
+      when: not ansible_check_mode
+  when: gitlab_ci_pipelines_exporter_binary_local_dir | length == 0
+
+- name: Propagate locally distributed gitlab-ci-pipelines-exporter binary
+  copy:
+    src: "{{ gitlab_ci_pipelines_exporter_binary_local_dir }}/gitlab-ci-pipelines-exporter"
+    dest: "{{ _gitlab_ci_pipelines_exporter_binary_install_dir }}/gitlab-ci-pipelines-exporter"
+    mode: 0755
+    owner: root
+    group: root
+  when: gitlab_ci_pipelines_exporter_binary_local_dir | length > 0
+  notify: restart gitlab-ci-pipelines-exporter

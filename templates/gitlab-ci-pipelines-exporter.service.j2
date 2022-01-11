@@ -1,0 +1,33 @@
+{{ ansible_managed | comment }}
+
+[Unit]
+Description=Prometheus GitLab-CI Pipelines Exporter
+After=network-online.target
+
+[Service]
+Type=simple
+User={{ _gitlab_ci_pipelines_exporter_system_user }}
+Group={{ _gitlab_ci_pipelines_exporter_system_group }}
+ExecStart={{ _gitlab_ci_pipelines_exporter_binary_install_dir }}/gitlab-ci-pipelines-exporter \
+    run \
+    --config {{ _gitlab_ci_pipelines_exporter_config_dir }}/config.yml
+
+SyslogIdentifier=gitlab-ci-pipelines-exporter
+Restart=always
+RestartSec=1
+StartLimitInterval=0
+
+ProtectHome=yes
+NoNewPrivileges=yes
+
+{% if gitlab_ci_pipelines_exporter_systemd_version | int >= 232 %}
+ProtectSystem=strict
+ProtectControlGroups=true
+ProtectKernelModules=true
+ProtectKernelTunables=yes
+{% else %}
+ProtectSystem=full
+{% endif %}
+
+[Install]
+WantedBy=multi-user.target

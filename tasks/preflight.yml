@@ -1,0 +1,74 @@
+---
+- name: Assert usage of systemd as an init system
+  assert:
+    that: ansible_service_mgr == 'systemd'
+    msg: "This role only works with systemd"
+
+- name: Get systemd version
+  command: systemctl --version
+  changed_when: false
+  check_mode: false
+  register: __systemd_version
+
+- name: Set systemd version fact
+  set_fact:
+    gitlab_ci_pipelines_exporter_systemd_version: "{{ __systemd_version.stdout_lines[0] | regex_replace('^systemd\\s(\\d+).*$', '\\1') }}"
+
+- name: Check if gitlab-ci-pipelines-exporter ist installed
+  stat:
+    path: "{{ _gitlab_ci_pipelines_exporter_binary_install_dir }}/gitlab_ci_pipelines_exporter"
+  register: __gitlab_ci_pipelines_exporter_is_installed
+  check_mode: false
+  tags:
+    - gitlab_ci_pipelines_exporter_install
+
+- name: Gather currently installed gitlab-ci-pipelines-exporter version (if any)
+  command: "{{ _gitlab_ci_pipelines_exporter_binary_install_dir }}/gitlab-ci-pipelines-exporter --version"
+  args:
+    warn: false
+  changed_when: false
+  register: __gitlab_ci_pipelines_exporter_version_output
+  check_mode: false
+  when: __gitlab_ci_pipelines_exporter_is_installed.stat.exists
+  tags:
+    - gitlab_ci_pipelines_exporter_install
+
+- block:
+    - name: Get latest release
+      uri:
+        url: "https://github.com/mvisonneau/gitlab-ci-pipelines-exporter/releases/latest"
+        method: GET
+        return_content: true
+        status_code: 200
+        body_format: json
+        user: "{{ lookup('env', 'GH_USER') | default(omit)  }}"
+        password: "{{ lookup('env', 'GH_TOKEN') | default(omit)  }}"
+      no_log: "{{ not lookup('env', 'MOLECULE_DEBUG') | bool  }}"
+      register: _latest_release
+      until: _latest_release.status == 200
+      retries: 5
+
+    - name: "Set gitlab_ci_pipelines_exporter version to {{ _latest_release.json.tag_name[1:] }}"
+      set_fact:
+        gitlab_ci_pipelines_exporter_version: "{{ _latest_release.json.tag_name[1:] }}"
+
+  when:
+    - gitlab_ci_pipelines_exporter_version == "latest"
+    - gitlab_ci_pipelines_exporter_binary_local_dir | length == 0
+  delegate_to: localhost
+  run_once: true
+
+- block:
+    - name: Get checksum list from github
+      set_fact:
+        _checksums: "{{ lookup('url', 'https://github.com/mvisonneau/gitlab-ci-pipelines-exporter/releases/download/v' + gitlab_ci_pipelines_exporter_version + '/gitlab-ci-pipelines-exporter_v' + gitlab_ci_pipelines_exporter_version + '_sha512sums.txt', wantlist=True) | list  }}"
+      run_once: true
+
+    - name: "Get checksums for {{ go_arch }} architecture"
+      set_fact:
+        gitlab_ci_pipelines_exporter_checksum: "{{ item.split(' ')[0] }}"
+      with_items: "{{ _checksums }}"
+      when:
+        - "('linux_' + go_arch + '.tar.gz') in item"
+  delegate_to: localhost
+  when: gitlab_ci_pipelines_exporter_binary_local_dir | length == 0

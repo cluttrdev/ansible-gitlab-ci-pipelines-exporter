@@ -1,0 +1,27 @@
+---
+- name: Copy the gitlab-ci-pipelines-exporter systemd service file
+  template:
+    src: gitlab-ci-pipelines-exporter.service.j2
+    dest: /etc/systemd/system/gitlab-ci-pipelines-exporter.service
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart gitlab-ci-pipelines-exporter
+
+- block:
+    - name: Create gitlab-ci-pipelines-exporter config directory
+      file:
+        path: "{{ _gitlab_ci_pipelines_exporter_config_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: 0775
+
+    - name: Copy the gitlab-ci-pipelines-exporter config file
+      template:
+        src: config.yml.j2
+        dest: "{{ _gitlab_ci_pipelines_exporter_config_dir }}/config.yml"
+        owner: root
+        group: "{{ _gitlab_ci_pipelines_exporter_system_group }}"
+        mode: 0640
+      notify: restart gitlab-ci-pipelines-exporter

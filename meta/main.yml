@@ -1,0 +1,23 @@
+galaxy_info:
+  role_name: gitlab_ci_pipelines_exporter
+  description: GitLab CI Pipelines Exporter
+  author: Andreas Kunze
+
+  license: MIT
+
+  min_ansible_version: 2.7
+
+  platforms:
+    - name: Debian
+      versions:
+        - buster
+        - bullseye
+
+  galaxy_tags:
+    - monitoring
+    - prometheus
+    - exporter
+    - metrics
+    - gitlab
+
+dependencies: []

@@ -1,0 +1,29 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+{{ ansible_managed | comment }}
+# https://github.com/mvisonneau/gitlab-ci-pipelines-exporter/blob/main/docs/configuration_syntax.md
+
+server:
+  listen_address: {{ gitlab_ci_pipelines_exporter_server_listen_address }}
+
+gitlab:
+  url: {{ gitlab_ci_pipelines_exporter_gitlab_url }}
+  token: {{ gitlab_ci_pipelines_exporter_gitlab_token }}
+  health_url: {{ gitlab_ci_pipelines_exporter_gitlab_health_url }}
+  enable_health_check: {{ gitlab_ci_pipelines_exporter_gitlab_enable_health_check }}
+  enable_tls_verify: {{ gitlab_ci_pipelines_exporter_gitlab_enable_tls_verify }}
+
+{% if gitlab_ci_pipelines_exporter_project_defaults | length > 0 %}
+project_defaults:
+  {{ gitlab_ci_pipelines_exporter_project_defaults | to_nice_yaml(indent=2) | indent(2, False) }}
+{% endif %}
+
+{% if gitlab_ci_pipelines_exporter_projects != [] %}
+projects:
+  {{ gitlab_ci_pipelines_exporter_projects | to_nice_yaml(indent=2) | indent(2, False) }}
+{% endif %}
+
+
+{% if gitlab_ci_pipelines_exporter_wildcards != [] %}
+wildcards:
+  {{ gitlab_ci_pipelines_exporter_wildcards | to_nice_yaml(indent=2) | indent(2, False) }}
+{% endif %}

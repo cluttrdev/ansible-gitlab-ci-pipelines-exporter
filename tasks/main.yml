@@ -1,0 +1,33 @@
+---
+- import_tasks: preflight.yml
+  tags:
+    - gitlab_ci_pipelines_exporter_install
+    - gitlab_ci_pipelines_exporter_configure
+    - gitlab_ci_pipelines_exporter_run
+
+- import_tasks: install.yml
+  become: true
+  when:
+    ( not __gitlab_ci_pipelines_exporter_is_installed.stat.exists ) or
+    ( (__gitlab_ci_pipelines_exporter_current_version_output.stderr_lines | length > 0) and (__gitlab_ci_pipelines_exporter_current_version_output.stderr_lines[0].split(" ")[2] != gitlab_ci_pipelines_exporter_version) ) or
+    ( (__gitlab_ci_pipelines_exporter_current_version_output.stdout_lines | length > 0) and (__gitlab_ci_pipelines_exporter_current_version_output.stdout_lines[0].split(" ")[2] != gitlab_ci_pipelines_exporter_version) ) or
+    ( gitlab_ci_pipelines_exporter_binary_local_dir | length > 0 )
+  tags:
+    - gitlab_ci_pipelines_exporter_install
+
+- import_tasks: configure.yml
+  become: true
+  tags:
+    - gitlab_ci_pipelines_exporter_configure
+
+- name: Ensure gitlab-ci-pipelines-exporter is enabled on boot
+  become: true
+  systemd:
+    daemon_reload: true
+    name: gitlab-ci-pipelines-exporter
+    enabled: true
+    state: started
+  when:
+    - not ansible_check_mode
+  tags:
+    - gitlab_ci_pipelines_exporter_run

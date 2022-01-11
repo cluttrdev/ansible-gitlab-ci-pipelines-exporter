@@ -1,0 +1,34 @@
+---
+# Internal variables
+_gitlab_ci_pipelines_exporter_binary_install_dir: "/usr/local/bin"
+_gitlab_ci_pipelines_exporter_config_dir: "/etc/gitlab-ci-pipelines-exporter"
+_gitlab_ci_pipelines_exporter_system_group: "gitlab-ci-exp"
+_gitlab_ci_pipelines_exporter_system_user: "{{ _gitlab_ci_pipelines_exporter_system_group }}"
+
+# Deployment variables
+gitlab_ci_pipelines_exporter_version: "0.5.2"
+gitlab_ci_pipelines_exporter_binary_local_dir: ""
+
+# Config variables
+gitlab_ci_pipelines_exporter_server_listen_address: ":8080"
+
+gitlab_ci_pipelines_exporter_gitlab_url: "https://gitlab.com"
+gitlab_ci_pipelines_exporter_gitlab_token: ""
+gitlab_ci_pipelines_exporter_gitlab_health_url: "{{ gitlab_ci_pipelines_exporter_gitlab_url }}/-/health"
+gitlab_ci_pipelines_exporter_gitlab_enable_health_check: true
+gitlab_ci_pipelines_exporter_gitlab_enable_tls_verify: true
+
+gitlab_ci_pipelines_exporter_project_defaults: {}
+#gitlab_ci_pipelines_exporter_project_defaults:
+#  pull:
+#    refs:
+#      branches:
+#        regexp: "^main|master$"
+
+gitlab_ci_pipelines_exporter_projects: []
+#gitlab_ci_pipelines_exporter_projects:
+#  - name: foo/bar
+
+gitlab_ci_pipelines_exporter_wildcards: []
+#gitlab_ci_pipelines_exporter_wildcards:
+#  - {}
