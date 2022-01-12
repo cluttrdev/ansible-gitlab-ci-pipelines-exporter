@@ -1,5 +1,8 @@
 # Ansible Role: gitlab ci pipelines exporter
 
+**Disclaimer:** This project is heavily influenced by [cloudalchemy/ansible-node-exporter](https://github.com/cloudalchemy/ansible-node-exporter)
+and mostly just replaced the exporter names and variables.
+
 ## Description
 
 Deploy prometheus [gitlab ci pipelines exporter](https://github.com/mvisonneau/gitlab-ci-pipelines-exporter) using ansible.
