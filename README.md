@@ -25,6 +25,7 @@ All variables that can be overridden are stored in [defaults/main.yml](defaults/
 | `gitlab_ci_pipelines_exporter_gitlab_health_url` | "{{ gitlab_ci_pipelines_exporter_gitlab_url }}/-/health" | Alternative URL for determining health of GitLab API for the readiness probe. |
 | `gitlab_ci_pipelines_exporter_enable_health_check` | true | Enable verification of readiness for target GitLab instance. |
 | `gitlab_ci_pipelines_exporter_enable_tls_verify` | true | Enable TLS verification for target GitLab instance (handy when self-hosting). |
+| `gitlab_ci_pipelines_exporter_garbage_collect` | {} | When to garbage collect information. See [here](https://github.com/mvisonneau/gitlab-ci-pipelines-exporter/blob/main/docs/configuration_syntax.md?plain=1#L149) for configuration syntax. |
 | `gitlab_ci_pipelines_exporter_project_defaults` | {} | Default [settings](https://github.com/mvisonneau/gitlab-ci-pipelines-exporter/blob/main/docs/configuration_syntax.md?plain=1#198) which can be overridden at the project or wildcard level. |
 | `gitlab_ci_pipelines_exporter_projects` | [] | The list of projects you want to monitor. See [here](https://github.com/mvisonneau/gitlab-ci-pipelines-exporter/blob/main/docs/configuration_syntax.md?plain=1#305) for configuration syntax. |
 | `gitlab_ci_pipelines_exporter_wildcards` | [] | Settings to dynamically fetch projects to monitor. See [here](https://github.com/mvisonneau/gitlab-ci-pipelines-exporter/blob/main/docs/configuration_syntax.md?plain=1#412) for configuration syntax. |

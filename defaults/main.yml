@@ -18,6 +18,25 @@ gitlab_ci_pipelines_exporter_gitlab_health_url: "{{ gitlab_ci_pipelines_exporter
 gitlab_ci_pipelines_exporter_gitlab_enable_health_check: true
 gitlab_ci_pipelines_exporter_gitlab_enable_tls_verify: true
 
+gitlab_ci_pipelines_exporter_garbage_collect: {}
+#gitlab_ci_pipelines_exporter_garbage_collect:
+#  projects:
+#    on_init: false
+#    scheduled: true
+#    interval_seconds: 14400
+#  environments:
+#    on_init: false
+#    scheduled: true
+#    interval_seconds: 14400
+#  refs:
+#    on_init: false
+#    scheduled: true
+#    interval_seconds: 1800
+#  metrics:
+#    on_init: false
+#    scheduled: true
+#    interval_seconds: 600
+
 gitlab_ci_pipelines_exporter_project_defaults: {}
 #gitlab_ci_pipelines_exporter_project_defaults:
 #  pull:

@@ -12,6 +12,11 @@ gitlab:
   enable_health_check: {{ gitlab_ci_pipelines_exporter_gitlab_enable_health_check }}
   enable_tls_verify: {{ gitlab_ci_pipelines_exporter_gitlab_enable_tls_verify }}
 
+{% if gitlab_ci_pipelines_exporter_garbage_collect | length > 0 %}
+garbage_collect:
+  {{ gitlab_ci_pipelines_exporter_garbage_collect | to_nice_yaml(indent=2) | indent(2, False) }}
+{% endif %}
+
 {% if gitlab_ci_pipelines_exporter_project_defaults | length > 0 %}
 project_defaults:
   {{ gitlab_ci_pipelines_exporter_project_defaults | to_nice_yaml(indent=2) | indent(2, False) }}
